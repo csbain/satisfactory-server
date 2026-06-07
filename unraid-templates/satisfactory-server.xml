@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>satisfactory-server</Name>
-  <Repository>wolveix/satisfactory-server:latest</Repository>
-  <Registry>https://hub.docker.com/r/wolveix/satisfactory-server</Registry>
+  <Repository>ghcr.io/csbain/satisfactory-server:latest</Repository>
+  <Registry>https://github.com/csbain/satisfactory-server/pkgs/container/satisfactory-server</Registry>
   <Network>bridge</Network>
   <Shell>bash</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/wolveix/satisfactory-server/issues</Support>
-  <Project>https://github.com/wolveix/satisfactory-server</Project>
+  <Support>https://github.com/csbain/satisfactory-server/issues</Support>
+  <Project>https://github.com/csbain/satisfactory-server</Project>
   <Overview>Satisfactory Dedicated Server with embedded SFTP mod management and Tailscale VPN. Fully optimized for peak single-thread tick performance and network bandwidth.</Overview>
   <Category>GameServers: Status:Stable</Category>
   <WebUI></WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/wolveix/satisfactory-server/main/unraid-templates/satisfactory-server.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/wolveix/satisfactory-server/main/.github/logo.png</Icon>
+  <TemplateURL>https://raw.githubusercontent.com/csbain/satisfactory-server/main/unraid-templates/satisfactory-server.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/csbain/satisfactory-server/main/.github/logo.png</Icon>
   <ExtraParams>--cap-add=NET_ADMIN --cap-add=NET_RAW</ExtraParams>
   <Description>Satisfactory Dedicated Server with embedded SFTP mod management and Tailscale VPN. Fully optimized for peak single-thread tick performance and network bandwidth.</Description>
 

@@ -2,7 +2,7 @@ services:
   satisfactory-server:
     container_name: 'satisfactory-server'
     hostname: 'satisfactory-server'
-    image: 'wolveix/satisfactory-server:latest'
+    image: 'ghcr.io/csbain/satisfactory-server:latest'
     cap_add:
       - NET_ADMIN
       - NET_RAW
