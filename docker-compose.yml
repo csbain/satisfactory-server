@@ -3,21 +3,32 @@ services:
     container_name: 'satisfactory-server'
     hostname: 'satisfactory-server'
     image: 'wolveix/satisfactory-server:latest'
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - '/dev/net/tun:/dev/net/tun'
     ports:
       - '7777:7777/tcp'
       - '7777:7777/udp'
       - '8888:8888/tcp'
+      - '2222:2222/tcp'
     volumes:
+      # For Unraid: Bypasses FUSE overhead by mapping directly to cache disk (highly recommended)
+      # e.g., - '/mnt/cache/appdata/satisfactory-server:/config'
       - './satisfactory-server:/config'
     environment:
       - MAXPLAYERS=4
       - PGID=1000
       - PUID=1000
       - STEAMBETA=false
+      - SFTP_PASSWORD=satisfactory-sftp-pass
+      - TS_AUTHKEY=tskey-auth-YOUR-KEY
+      - TS_HOSTNAME=satisfactory-server
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 8G
+          memory: 16G
         reservations:
-          memory: 4G
+          memory: 8G

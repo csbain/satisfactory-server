@@ -107,6 +107,8 @@ mkdir -p \
     /config/logs/steam \
     /config/saved/blueprints \
     /config/saved/server \
+    /config/ficsit-cli \
+    /home/steam/.config \
     "${GAMECONFIGDIR}/Config/LinuxServer" \
     "${GAMECONFIGDIR}/Logs" \
     "${GAMESAVESDIR}/server" \
@@ -116,10 +118,125 @@ mkdir -p \
 
 echo "Satisfactory logs can be found in /config/gamefiles/FactoryGame/Saved/Logs" > /config/logs/satisfactory-path.txt
 
+rm -rf /home/steam/.config/ficsit
+ln -sf /config/ficsit-cli /home/steam/.config/ficsit
+
+# Prepare SSHD Configuration File
+mkdir -p /etc/ssh
+cat <<EOF > /etc/ssh/sshd_config_satisfactory
+Port 2222
+Protocol 2
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+UsePAM yes
+Subsystem sftp internal-sftp
+X11Forwarding no
+AllowTcpForwarding no
+PrintMotd no
+PasswordAuthentication yes
+PermitRootLogin no
+AllowUsers steam
+EOF
+
 if [[ "$CURRENTUID" -eq "0" ]]; then
-    chown -R "$PUID":"$PGID" /config /home/steam /tmp/dumps
-    exec gosu "$USER" "/home/steam/run.sh" "$@"
+    # Update home directory of steam user to /config for SFTP landing
+    usermod -d /config steam || true
+    
+    # Generate host keys if missing
+    if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+        echo "Generating SSH host keys..."
+        ssh-keygen -A
+    fi
+    
+    # Update SFTP Password for steam user
+    if [ -z "$SFTP_PASSWORD" ]; then
+        SFTP_PASSWORD="satisfactory-sftp-pass"
+        printf "${MSGWARNING} SFTP_PASSWORD is not set. Defaulting to '%s'\\n" "$SFTP_PASSWORD"
+    fi
+    echo "steam:$SFTP_PASSWORD" | chpasswd
+    
+    # Auto-add installation path for ficsit-cli
+    gosu steam ficsit installation add /config/gamefiles || true
 else
-    # running within a rootless environment
-    exec "/home/steam/run.sh" "$@"
+    # Rootless fallback
+    ficsit installation add /config/gamefiles || true
+fi
+
+# Generate supervisord configuration
+mkdir -p /etc/supervisor/conf.d
+export EXTRA_ARGS="$@"
+
+if [[ "$CURRENTUID" -eq "0" ]]; then
+    # Running as root: We manage both the game server and sshd via supervisord
+    chown -R "$PUID":"$PGID" /config /home/steam /tmp/dumps
+    cat <<EOF > /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+logfile=/dev/stdout
+logfile_maxbytes=0
+
+[program:satisfactory]
+command=/home/steam/run.sh %(environ_EXTRA_ARGS)s
+user=steam
+directory=/config
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+stopwaitsecs=60
+
+[program:sshd]
+command=/usr/sbin/sshd -D -e -f /etc/ssh/sshd_config_satisfactory
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+EOF
+
+    # Handle Tailscale setup if authkey is provided
+    if [[ -n "$TS_AUTHKEY" ]]; then
+        mkdir -p /config/tailscale /var/run/tailscale
+        cat <<EOF >> /etc/supervisor/conf.d/supervisord.conf
+
+[program:tailscaled]
+command=/usr/sbin/tailscaled --state=/config/tailscale/tailscaled.state --socket=/var/run/tailscale/tailscaled.sock
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+
+[program:tailscale-up]
+command=/home/steam/tailscale-up.sh
+autorestart=false
+startsecs=0
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+EOF
+    fi
+    exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
+else
+    # Running within a rootless environment: No sshd or tailscale permitted, run satisfactory under supervisor
+    cat <<EOF > /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+logfile=/dev/stdout
+logfile_maxbytes=0
+
+[program:satisfactory]
+command=/home/steam/run.sh %(environ_EXTRA_ARGS)s
+directory=/config
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+autorestart=true
+stopwaitsecs=60
+EOF
+    exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
 fi

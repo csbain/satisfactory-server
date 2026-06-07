@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>satisfactory-server</Name>
+  <Repository>wolveix/satisfactory-server:latest</Repository>
+  <Registry>https://hub.docker.com/r/wolveix/satisfactory-server</Registry>
+  <Network>bridge</Network>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/wolveix/satisfactory-server/issues</Support>
+  <Project>https://github.com/wolveix/satisfactory-server</Project>
+  <Overview>Satisfactory Dedicated Server with embedded SFTP mod management and Tailscale VPN. Fully optimized for peak single-thread tick performance and network bandwidth.</Overview>
+  <Category>GameServers: Status:Stable</Category>
+  <WebUI></WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/wolveix/satisfactory-server/main/unraid-templates/satisfactory-server.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/wolveix/satisfactory-server/main/.github/logo.png</Icon>
+  <ExtraParams>--cap-add=NET_ADMIN --cap-add=NET_RAW</ExtraParams>
+  <Description>Satisfactory Dedicated Server with embedded SFTP mod management and Tailscale VPN. Fully optimized for peak single-thread tick performance and network bandwidth.</Description>
+
+  <!-- Mount Paths -->
+  <Config Name="Config Directory" Target="/config" Default="/mnt/cache/appdata/satisfactory-server" Mode="rw" Description="Satisfactory server persistent files (saves, game files, backups, configs). It is highly recommended to use a direct cache pool path (e.g. /mnt/cache/...) to bypass FUSE filesystem overhead and prevent autosave stutters." Type="Path" Display="always" Required="true" Mask="false">/mnt/cache/appdata/satisfactory-server</Config>
+
+  <!-- Network Ports -->
+  <Config Name="Game Port (UDP)" Target="7777" Default="7777" Mode="udp" Description="Main game server port (UDP)" Type="Port" Display="always" Required="true" Mask="false">7777</Config>
+  <Config Name="Game Port (TCP)" Target="7777" Default="7777" Mode="tcp" Description="Main game server port (TCP)" Type="Port" Display="always" Required="true" Mask="false">7777</Config>
+  <Config Name="Messaging Port" Target="8888" Default="8888" Mode="tcp" Description="Server messaging and query port (TCP)" Type="Port" Display="always" Required="true" Mask="false">8888</Config>
+  <Config Name="SFTP Port" Target="2222" Default="2222" Mode="tcp" Description="Built-in SFTP server port for remote Satisfactory Mod Manager (SMM) connections" Type="Port" Display="always" Required="true" Mask="false">2222</Config>
+
+  <!-- Devices -->
+  <Config Name="TUN Device Path" Target="/dev/net/tun" Default="/dev/net/tun" Mode="" Description="TUN device endpoint (Required for Tailscale VPN connection)" Type="Device" Display="always" Required="false" Mask="false">/dev/net/tun</Config>
+
+  <!-- Environment Variables -->
+  <Config Name="SFTP Password" Target="SFTP_PASSWORD" Default="satisfactory-sftp-pass" Mode="" Description="Password for SFTP login (username is 'steam'). Used by SMM to connect and upload mods." Type="Variable" Display="always" Required="true" Mask="true">satisfactory-sftp-pass</Config>
+  <Config Name="Tailscale Auth Key" Target="TS_AUTHKEY" Default="" Mode="" Description="Your Tailscale auth/OAuth key. If provided, the container automatically registers with your Tailnet." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Tailscale Hostname" Target="TS_HOSTNAME" Default="satisfactory-server" Mode="" Description="The hostname this server will use on your Tailnet." Type="Variable" Display="always" Required="false" Mask="false">satisfactory-server</Config>
+  <Config Name="Max Players" Target="MAXPLAYERS" Default="4" Mode="" Description="Max players allowed on the server." Type="Variable" Display="always" Required="false" Mask="false">4</Config>
+  <Config Name="Max Objects" Target="MAXOBJECTS" Default="2162688" Mode="" Description="UObject allocation ceiling (increases memory but prevents crash on massive late-game bases)." Type="Variable" Display="always" Required="false" Mask="false">2162688</Config>
+  <Config Name="Max Tick Rate" Target="MAXTICKRATE" Default="30" Mode="" Description="Max tick rate for the server. Do not increase this beyond 30 on lower frequency server processors." Type="Variable" Display="always" Required="false" Mask="false">30</Config>
+  <Config Name="Autosave Rotation Count" Target="AUTOSAVENUM" Default="5" Mode="" Description="Number of rotating autosave files to keep." Type="Variable" Display="always" Required="false" Mask="false">5</Config>
+  <Config Name="Client Timeout" Target="TIMEOUT" Default="30" Mode="" Description="Timeout limit in seconds before disconnecting inactive client sessions." Type="Variable" Display="always" Required="false" Mask="false">30</Config>
+  <Config Name="PGID" Target="PGID" Default="1000" Mode="" Description="Group ID of the user the server will run as." Type="Variable" Display="always" Required="false" Mask="false">1000</Config>
+  <Config Name="PUID" Target="PUID" Default="1000" Mode="" Description="User ID of the user the server will run as." Type="Variable" Display="always" Required="false" Mask="false">1000</Config>
+  <Config Name="Steam Beta Branch" Target="STEAMBETA" Default="false" Mode="" Description="Set to 'true' to install the Experimental branch of the game." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="Skip Steam Update" Target="SKIPUPDATE" Default="false" Mode="" Description="Avoid updating the game files on container start." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="VM Override" Target="VMOVERRIDE" Default="false" Mode="" Description="Set to true to skip the hypervisor processor check (only if CPU is recognized as generic QEMU/KVM)." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+</Container>

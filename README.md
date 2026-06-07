@@ -48,11 +48,13 @@ docker run \
 --env PGID=1000 \
 --env PUID=1000 \
 --env STEAMBETA=false \
---memory-reservation=4G \
---memory 8G \
+--env SFTP_PASSWORD=satisfactory-sftp-pass \
+--memory-reservation=8G \
+--memory 16G \
 --publish 7777:7777/tcp \
 --publish 7777:7777/udp \
 --publish 8888:8888/tcp \
+--publish 2222:2222/tcp \
 wolveix/satisfactory-server:latest
 ```
 
@@ -68,9 +70,9 @@ wolveix/satisfactory-server:latest
   Allows you to easily access your savegames
 * For the environment (`--env`) variables please
   see [here](https://github.com/wolveix/satisfactory-server#environment-variables)
-* `--memory-reservation=4G` -> Reserves 4GB RAM from the host for the container's use
-* `--memory 8G` -> Restricts the container to 8GB RAM
-* `--publish` -> Specifies the ports that the container exposes<br>
+* `--memory-reservation=8G` -> Reserves 8GB RAM from the host for the container's use
+* `--memory 16G` -> Restricts the container to 16GB RAM
+* `--publish` -> Specifies the ports that the container exposes (including 2222 for embedded SFTP)<br>
 
 </details>
 
@@ -88,6 +90,7 @@ services:
       - '7777:7777/tcp'
       - '7777:7777/udp'
       - '8888:8888/tcp'
+      - '2222:2222/tcp'
     volumes:
       - './satisfactory-server:/config'
     environment:
@@ -95,14 +98,22 @@ services:
       - PGID=1000
       - PUID=1000
       - STEAMBETA=false
+      - SFTP_PASSWORD=satisfactory-sftp-pass
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 8G
+          memory: 16G
         reservations:
-          memory: 4G
+          memory: 8G
 ```
+
+### unRAID Template
+
+If you are running this container on **unRAID**, an XML template is included in this repository under:
+[unraid-templates/satisfactory-server.xml](file:///c:/Users/chris/projects/satisfactory-server/unraid-templates/satisfactory-server.xml)
+
+You can copy this XML file onto your unRAID flash drive at `/boot/config/plugins/dockerMan/templates-user/` to import the template directly into your Unraid Docker Manager interface, or add it to Community Applications.
 
 ### Updating
 
@@ -176,6 +187,9 @@ helm install satisfactory k8s-at-home/satisfactory -f values.yaml
 | `STEAMBETAKEY`          |           | set password for the beta game version (for testing)      |
 | `TIMEOUT`               |   `30`    | set client timeout (in seconds)                           |
 | `VMOVERRIDE`            |  `false`  | skips the CPU model check (should not ordinarily be used) |
+| `SFTP_PASSWORD`         | `satisfactory-sftp-pass` | password for SFTP server access (used for mod managers) |
+| `TS_AUTHKEY`            |           | auth key to enable embedded Tailscale connection          |
+| `TS_HOSTNAME`           | `satisfactory-server` | hostname for the server on your Tailnet             |
 
 ## Experimental Branch
 
@@ -184,43 +198,77 @@ If you want to run a server for the Experimental version of the game, set the `S
 
 ## Modding
 
-Mod support is still a little rough around the edges, but they do now work. This Docker container functions the same as
-a standalone installation, so you can follow the excellent technical documentation from the
-community [here](https://docs.ficsit.app/satisfactory-modding/latest/ForUsers/DedicatedServerSetup.html).
+Mod support is fully integrated into this Docker container. You have two options for managing mods:
 
-The container does **NOT** have an S/FTP server installed directly, as Docker images are intended to carry a single
-function/process. You can either SFTP into your host that houses the Satisfactory server (trivial to do if you're
-running Linux), or you can spin up an S/FTP server through the use of another Docker container using the Docker Compose
-example listed below:
+### 1. Remote Mod Management (Recommended)
+You can use the desktop **Satisfactory Mod Manager (SMM)** from your client PC to manage the server's mods over SFTP:
+1. Open SMM on your PC and navigate to the **"Manage Servers"** section.
+2. Click **"Add"** and select the **SFTP** protocol.
+3. Enter your server's credentials:
+   - **Host/IP:** Your server's IP address.
+   - **Port:** `2222` (default embedded SFTP port).
+   - **Username:** `steam`
+   - **Password:** The password set in your `SFTP_PASSWORD` environment variable.
+4. Set the path to `/config/gamefiles` (the Satisfactory installation directory).
+5. SMM will automatically connect, install SML (Satisfactory Mod Loader), and allow you to toggle mods on/off directly from your PC.
 
-```yaml
-services:
-  # only needed for mods
-  sftp-server:
-    container_name: 'sftp-server'
-    image: 'atmoz/sftp:latest'
-    volumes:
-      - './satisfactory-server:/home/your-ftp-user/satisfactory-server'
-    ports:
-      - '2222:22'
-    # set the user and password, and the user's UID (this should match the PUID and PGID of the satisfactory-server container)
-    command: 'your-ftp-user:your-ftp-password:1000'
-```
+### 2. Local CLI Mod Management (`ficsit-cli`)
+For command-line mod management directly inside the container, we have embedded **`ficsit-cli`** (v0.6.1):
+1. Execute the mod manager TUI by running:
+   ```bash
+   docker exec -it satisfactory-server ficsit
+   ```
+2. The CLI is pre-configured to detect your server's game files in `/config/gamefiles`. You can browse and manage your mods directly in the terminal interface. All configurations will be stored and persisted in `/config/ficsit-cli`.
 
-With this, you'll be able to SFTP into your server and access your game files via
-`/home/your-ftp-user/satisfactory-server/gamefiles`.
+## Tailscale Integration
+
+You can bake a **Tailscale** connection directly into this container, exposing both the game ports and the SFTP server port on your private Tailnet without needing to port-forward or open firewalls on your router.
+
+### Setup Requirements
+Since Tailscale manages network interfaces inside the container, you **must** pass the following runtime privileges:
+- **Capabilities:** `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW`
+- **Devices:** `--device=/dev/net/tun`
+
+### How to use:
+1. Generate an **Auth Key** in your [Tailscale Admin Console](https://login.tailscale.com/admin/settings/keys).
+2. Start the container with your key passed as the `TS_AUTHKEY` environment variable.
+3. The server will boot, automatically start the Tailscale daemon (`tailscaled`), register itself to your Tailnet under your specified `TS_HOSTNAME`, and save its state securely to `/config/tailscale` so it keeps the same IP address on rebuilds.
+4. Simply connect your game client or SFTP client (SMM) using the server's **Tailscale IP address**!
 
 ## How to Improve the Multiplayer Experience
 
-The [Satisfactory Wiki](https://satisfactory.wiki.gg/wiki/Multiplayer#Engine.ini) recommends a few config tweaks for
-your client to
-really get the best out of multiplayer:
+The [Satisfactory Wiki](https://satisfactory.wiki.gg/wiki/Multiplayer#Engine.ini) recommends a few config tweaks for your client to really get the best out of multiplayer:
 
 - Press `WIN + R`
 - Enter `%localappdata%/FactoryGame/Saved/Config/Windows`
 - Copy the config data from the wiki into the respective files
 - Right-click each of the 3 config files (Engine.ini, Game.ini, Scalability.ini)
 - Go to Properties > tick Read-only under the attributes
+
+## unRAID Performance Optimizations
+
+If you are running this container on **unRAID** (especially on multi-socket server hardware), follow these optimizations to prevent late-game lag and autosave stutters:
+
+### 1. Bypass FUSE Overhead
+By default, mapping to `/mnt/user/appdata/...` routes disk writes through unRAID's FUSE filesystem layer, which consumes significant CPU and can cause write-stutters during autosaves.
+- **Optimization:** Map the container's `/config` directory directly to your SSD cache pool path (e.g. `/mnt/cache/appdata/satisfactory-server`).
+
+### 2. NUMA-Aware CPU Pinning
+Satisfactory's game loop is heavily single-threaded. On multi-socket systems, crossing CPU sockets to access memory (NUMA misses) introduces high latency.
+- **Optimization:** Pin the container to physical cores on a **single CPU socket** (e.g. socket 0).
+- Run `numactl -H` in the unRAID terminal to identify core assignments, then use the CPU pinning tool in the Docker template settings to select physical cores on socket 0 only.
+- In unRAID global settings (Settings -> CPU Pinning), isolate these cores to prevent unRAID from scheduling other containers or OS tasks on them.
+
+### 3. Exclude GPU Allocations
+The dedicated server is fully headless (`-nullrhi`) and cannot utilize graphics hardware. Do not pass GPU variables or runtime flags (like `--runtime=nvidia`) to this container. Save your GPU resources for transcoding or VM passthroughs.
+
+### 4. Scheduled Restarts (Memory Leak Refresh)
+Dedicated game servers running on Unreal Engine can accumulate memory leaks over extended periods.
+- **Optimization:** Use unRAID's User Scripts plugin or a host cron job to run `docker restart satisfactory-server` once every 24–48 hours (e.g., at 4:00 AM) to clear server memory. Since we use `supervisord` with a 60-second graceful exit timeout, it is completely safe.
+
+### 5. Keep Server Tickrate at 30
+Avoid increasing the `MAXTICKRATE` environment variable to 60 or 120 on lower-frequency server CPUs (like Intel Xeon E5 v3/v4).
+- **Optimization:** Keeping the tickrate at 30 ensures the single-threaded simulation loop has ample time to process complex late-game factory calculations without falling behind and causing rubber-banding.
 
 ## Running as Non-Root User
 

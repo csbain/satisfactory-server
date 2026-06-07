@@ -88,6 +88,7 @@ fi
 ini_args=(
   "-ini:Engine:[/Script/FactoryGame.FGSaveSession]:mNumRotatingAutosaves=$AUTOSAVENUM"
   "-ini:Engine:[/Script/Engine.GarbageCollectionSettings]:gc.MaxObjectsInEditor=$MAXOBJECTS"
+  "-ini:Engine:[/Script/Engine.GarbageCollectionSettings]:gc.MaxObjectsInGame=$MAXOBJECTS"
   "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:LanServerMaxTickRate=$MAXTICKRATE"
   "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:NetServerMaxTickRate=$MAXTICKRATE"
   "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:ConnectionTimeout=$TIMEOUT"
@@ -97,6 +98,10 @@ ini_args=(
   "-ini:Game:[/Script/Engine.GameSession]:InitialConnectTimeout=$TIMEOUT"
   "-ini:Game:[/Script/Engine.GameSession]:MaxPlayers=$MAXPLAYERS"
   "-ini:GameUserSettings:[/Script/Engine.GameSession]:MaxPlayers=$MAXPLAYERS"
+  "-ini:Engine:[/Script/Engine.Player]:ConfiguredInternetSpeed=104857600"
+  "-ini:Engine:[/Script/Engine.Player]:ConfiguredLanSpeed=104857600"
+  "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:MaxClientRate=104857600"
+  "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:MaxInternetClientRate=104857600"
   "$DISABLESEASONALEVENTS"
   "$MULTIHOME"
 )
