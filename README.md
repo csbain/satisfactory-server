@@ -239,6 +239,17 @@ Since Tailscale manages network interfaces inside the container, you **must** pa
 4. Simply connect your game client or SFTP client (SMM) using the server's **Tailscale IP address**!
    - **All Ports Exposed**: The game server port `7777` (UDP/TCP), query/messaging port `8888` (TCP), and SFTP port `2222` (TCP) are automatically exposed on the `tailscale0` VPN interface inside the container. No router port forwarding or firewall rules are required to connect.
 
+## Custom Image Builds via GHCR
+
+This repository is pre-configured with a GitHub Actions workflow that automatically compiles and pushes the Docker image to your personal **GitHub Container Registry (GHCR)** on every push to the `main` branch or when a release tag is created.
+
+To run your own custom-built container image instead of the default one:
+- Replace `wolveix/satisfactory-server:latest` in your Docker command, Docker Compose file, or Unraid template with:
+  ```text
+  ghcr.io/YOUR_GITHUB_USERNAME/satisfactory-server:latest
+  ```
+  *(Make sure to replace `YOUR_GITHUB_USERNAME` with your lowercase GitHub username/org name).*
+
 ## How to Improve the Multiplayer Experience
 
 The [Satisfactory Wiki](https://satisfactory.wiki.gg/wiki/Multiplayer#Engine.ini) recommends a few config tweaks for your client to really get the best out of multiplayer:
