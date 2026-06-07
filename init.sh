@@ -11,10 +11,18 @@ RAMAVAILABLE=$(awk '/MemAvailable/ {printf( "%d\n", $2 / 1024000 )}' /proc/memin
 
 export CURRENTGID=$(id -g)
 export CURRENTUID=$(id -u)
+
+# Rename the 'steam' user if a custom SFTP_USERNAME is requested and we are root
+export SFTP_USERNAME="${SFTP_USERNAME:-steam}"
+if [[ "$CURRENTUID" -eq "0" ]] && [[ "$SFTP_USERNAME" != "steam" ]]; then
+    printf "Renaming 'steam' user to '%s' to support custom SFTP_USERNAME...\\n" "$SFTP_USERNAME"
+    usermod -l "$SFTP_USERNAME" steam
+fi
+
 export HOME="/home/steam"
-export STEAMGID=$(id -g steam)
-export STEAMUID=$(id -u steam)
-export USER="steam"
+export STEAMGID=$(id -g "$SFTP_USERNAME")
+export STEAMUID=$(id -u "$SFTP_USERNAME")
+export USER="$SFTP_USERNAME"
 
 if [[ "${DEBUG,,}" == "true" ]]; then
     printf "Debugging enabled (the container will exit after printing the debug info)\\n\\nPrinting environment variables:\\n"
@@ -84,7 +92,7 @@ fi
 
 if [[ "$CURRENTUID" -eq "0" ]]; then
     if [[ $(getent group $PGID | cut -d: -f1) ]]; then
-        usermod -a -G "$PGID" steam
+        usermod -a -G "$PGID" "$SFTP_USERNAME"
     else
         groupmod -g "$PGID" steam
     fi
@@ -92,7 +100,7 @@ if [[ "$CURRENTUID" -eq "0" ]]; then
     if [[ $(getent passwd ${PUID} | cut -d: -f1) ]]; then
         USER=$(getent passwd $PUID | cut -d: -f1)
     else
-        usermod -u "$PUID" steam
+        usermod -u "$PUID" "$SFTP_USERNAME"
     fi
 fi
 
@@ -136,12 +144,12 @@ AllowTcpForwarding no
 PrintMotd no
 PasswordAuthentication yes
 PermitRootLogin no
-AllowUsers steam
+AllowUsers $SFTP_USERNAME
 EOF
 
 if [[ "$CURRENTUID" -eq "0" ]]; then
-    # Update home directory of steam user to /config for SFTP landing
-    usermod -d /config steam || true
+    # Update home directory of custom sftp user to /config for SFTP landing
+    usermod -d /config "$SFTP_USERNAME" || true
     
     # Generate host keys if missing
     if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
@@ -149,15 +157,15 @@ if [[ "$CURRENTUID" -eq "0" ]]; then
         ssh-keygen -A
     fi
     
-    # Update SFTP Password for steam user
+    # Update SFTP Password for custom sftp user
     if [ -z "$SFTP_PASSWORD" ]; then
         SFTP_PASSWORD="satisfactory-sftp-pass"
         printf "${MSGWARNING} SFTP_PASSWORD is not set. Defaulting to '%s'\\n" "$SFTP_PASSWORD"
     fi
-    echo "steam:$SFTP_PASSWORD" | chpasswd
+    echo "$SFTP_USERNAME:$SFTP_PASSWORD" | chpasswd
     
     # Auto-add installation path for ficsit-cli
-    gosu steam ficsit installation add /config/gamefiles || true
+    gosu "$SFTP_USERNAME" ficsit installation add /config/gamefiles || true
 else
     # Rootless fallback
     ficsit installation add /config/gamefiles || true
@@ -178,7 +186,7 @@ logfile_maxbytes=0
 
 [program:satisfactory]
 command=/home/steam/run.sh %(environ_EXTRA_ARGS)s
-user=steam
+user=%(environ_SFTP_USERNAME)s
 directory=/config
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0

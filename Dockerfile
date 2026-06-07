@@ -26,9 +26,12 @@ ENV AUTOSAVENUM="5" \
     STEAMBETAKEY="" \
     TIMEOUT="30" \
     VMOVERRIDE="false" \
+    SFTP_USERNAME="steam" \
     SFTP_PASSWORD="satisfactory-sftp-pass" \
     TS_AUTHKEY="" \
-    TS_HOSTNAME="satisfactory-server"
+    TS_HOSTNAME="satisfactory-server" \
+    GC_TIME_BETWEEN_PURGING="30" \
+    GC_NUM_OBJECTS_PER_STEP="2000"
 
 # hadolint ignore=DL3008
 RUN set -x \

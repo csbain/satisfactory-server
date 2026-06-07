@@ -37,6 +37,18 @@ printf "Setting max tick rate to %s\\n" "$MAXTICKRATE"
 [[ "${SERVERSTREAMING,,}" == "true" ]] && SERVERSTREAMING="1" || SERVERSTREAMING="0"
 printf "Setting server streaming to %s\\n" "$SERVERSTREAMING"
 
+if ! [[ "$GC_TIME_BETWEEN_PURGING" =~ $NUMCHECK ]]; then
+    printf "Invalid GC time between purging given: %s\\n" "$GC_TIME_BETWEEN_PURGING"
+    GC_TIME_BETWEEN_PURGING="30"
+fi
+printf "Setting GC time between purging to %s\\n" "$GC_TIME_BETWEEN_PURGING"
+
+if ! [[ "$GC_NUM_OBJECTS_PER_STEP" =~ $NUMCHECK ]]; then
+    printf "Invalid GC num objects per step given: %s\\n" "$GC_NUM_OBJECTS_PER_STEP"
+    GC_NUM_OBJECTS_PER_STEP="2000"
+fi
+printf "Setting GC num objects per step to %s\\n" "$GC_NUM_OBJECTS_PER_STEP"
+
 if ! [[ "$TIMEOUT" =~ $NUMCHECK ]] ; then
     printf "Invalid timeout number given: %s\\n" "$TIMEOUT"
     TIMEOUT="30"
@@ -89,6 +101,8 @@ ini_args=(
   "-ini:Engine:[/Script/FactoryGame.FGSaveSession]:mNumRotatingAutosaves=$AUTOSAVENUM"
   "-ini:Engine:[/Script/Engine.GarbageCollectionSettings]:gc.MaxObjectsInEditor=$MAXOBJECTS"
   "-ini:Engine:[/Script/Engine.GarbageCollectionSettings]:gc.MaxObjectsInGame=$MAXOBJECTS"
+  "-ini:Engine:[/Script/Engine.GarbageCollectionSettings]:gc.TimeBetweenPurgingPendingKillObjects=$GC_TIME_BETWEEN_PURGING"
+  "-ini:Engine:[/Script/Engine.GarbageCollectionSettings]:gc.NumObjectsPerStep=$GC_NUM_OBJECTS_PER_STEP"
   "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:LanServerMaxTickRate=$MAXTICKRATE"
   "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:NetServerMaxTickRate=$MAXTICKRATE"
   "-ini:Engine:[/Script/OnlineSubsystemUtils.IpNetDriver]:ConnectionTimeout=$TIMEOUT"

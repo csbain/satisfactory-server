@@ -22,9 +22,12 @@ services:
       - PGID=1000
       - PUID=1000
       - STEAMBETA=false
+      - SFTP_USERNAME=steam
       - SFTP_PASSWORD=satisfactory-sftp-pass
       - TS_AUTHKEY=tskey-auth-YOUR-KEY
       - TS_HOSTNAME=satisfactory-server
+      - GC_TIME_BETWEEN_PURGING=30
+      - GC_NUM_OBJECTS_PER_STEP=2000
     restart: unless-stopped
     deploy:
       resources:

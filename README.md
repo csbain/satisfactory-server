@@ -187,9 +187,12 @@ helm install satisfactory k8s-at-home/satisfactory -f values.yaml
 | `STEAMBETAKEY`          |           | set password for the beta game version (for testing)      |
 | `TIMEOUT`               |   `30`    | set client timeout (in seconds)                           |
 | `VMOVERRIDE`            |  `false`  | skips the CPU model check (should not ordinarily be used) |
+| `SFTP_USERNAME`         |   `steam` | username for SFTP server access (used for mod managers) |
 | `SFTP_PASSWORD`         | `satisfactory-sftp-pass` | password for SFTP server access (used for mod managers) |
 | `TS_AUTHKEY`            |           | auth key to enable embedded Tailscale connection          |
 | `TS_HOSTNAME`           | `satisfactory-server` | hostname for the server on your Tailnet             |
+| `GC_TIME_BETWEEN_PURGING`|   `30`    | Unreal Engine Garbage Collection frequency (seconds) to reduce hitching |
+| `GC_NUM_OBJECTS_PER_STEP`|  `2000`   | Max objects to purge per Garbage Collection step           |
 
 ## Experimental Branch
 
@@ -207,7 +210,7 @@ You can use the desktop **Satisfactory Mod Manager (SMM)** from your client PC t
 3. Enter your server's credentials:
    - **Host/IP:** Your server's IP address.
    - **Port:** `2222` (default embedded SFTP port).
-   - **Username:** `steam`
+   - **Username:** The username set in your `SFTP_USERNAME` environment variable (defaults to `steam`).
    - **Password:** The password set in your `SFTP_PASSWORD` environment variable.
 4. Set the path to `/config/gamefiles` (the Satisfactory installation directory).
 5. SMM will automatically connect, install SML (Satisfactory Mod Loader), and allow you to toggle mods on/off directly from your PC.
@@ -234,6 +237,7 @@ Since Tailscale manages network interfaces inside the container, you **must** pa
 2. Start the container with your key passed as the `TS_AUTHKEY` environment variable.
 3. The server will boot, automatically start the Tailscale daemon (`tailscaled`), register itself to your Tailnet under your specified `TS_HOSTNAME`, and save its state securely to `/config/tailscale` so it keeps the same IP address on rebuilds.
 4. Simply connect your game client or SFTP client (SMM) using the server's **Tailscale IP address**!
+   - **All Ports Exposed**: The game server port `7777` (UDP/TCP), query/messaging port `8888` (TCP), and SFTP port `2222` (TCP) are automatically exposed on the `tailscale0` VPN interface inside the container. No router port forwarding or firewall rules are required to connect.
 
 ## How to Improve the Multiplayer Experience
 
