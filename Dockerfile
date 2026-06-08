@@ -31,7 +31,9 @@ ENV AUTOSAVENUM="5" \
     TS_AUTHKEY="" \
     TS_HOSTNAME="satisfactory-server" \
     GC_TIME_BETWEEN_PURGING="30" \
-    GC_NUM_OBJECTS_PER_STEP="2000"
+    GC_NUM_OBJECTS_PER_STEP="2000" \
+    STEAMCMD_VALIDATE="false" \
+    TZ="UTC"
 
 # hadolint ignore=DL3008
 RUN set -x \

@@ -32,6 +32,8 @@ services:
       - TS_HOSTNAME=satisfactory-server
       - GC_TIME_BETWEEN_PURGING=30
       - GC_NUM_OBJECTS_PER_STEP=2000
+      - STEAMCMD_VALIDATE=false
+      - TZ=UTC
     restart: unless-stopped
     deploy:
       resources:

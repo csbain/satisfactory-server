@@ -151,11 +151,18 @@ if [[ "${SKIPUPDATE,,}" != "true" ]]; then
     fi
 
     printf "\\nDownloading the latest version of the game...\\n"
-    if [ -f "/config/gamefiles/steamapps/appmanifest_1690800.acf" ]; then
-        printf "\\nRemoving the app manifest to force Steam to check for an update...\\n"
-        rm "/config/gamefiles/steamapps/appmanifest_1690800.acf" || true
+    VALIDATE_PARAM=""
+    if [[ "${STEAMCMD_VALIDATE,,}" == "true" ]]; then
+        printf "STEAMCMD_VALIDATE is set to true. Forcing verification of all game files.\\n"
+        VALIDATE_PARAM="validate"
+        if [ -f "/config/gamefiles/steamapps/appmanifest_1690800.acf" ]; then
+            printf "Removing the app manifest to force Steam to verify files...\\n"
+            rm "/config/gamefiles/steamapps/appmanifest_1690800.acf" || true
+        fi
+    else
+        printf "STEAMCMD_VALIDATE is false. Skipping file validation sweep to accelerate boot time.\\n"
     fi
-    steamcmd +force_install_dir /config/gamefiles +login anonymous +app_update "$STEAMAPPID" -beta "$STEAMBETAFLAG" $STEAMBETAPASSWORD validate +quit
+    steamcmd +force_install_dir /config/gamefiles +login anonymous +app_update "$STEAMAPPID" -beta "$STEAMBETAFLAG" $STEAMBETAPASSWORD $VALIDATE_PARAM +quit
     cp -r /home/steam/.steam/steam/logs/* "/config/logs/steam" || printf "Failed to store Steam logs\\n"
 else
     printf "Skipping update as flag is set\\n"

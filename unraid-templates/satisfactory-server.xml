@@ -48,5 +48,7 @@
   <Config Name="PUID" Target="PUID" Default="1000" Mode="" Description="User ID of the user the server will run as." Type="Variable" Display="always" Required="false" Mask="false">1000</Config>
   <Config Name="Steam Beta Branch" Target="STEAMBETA" Default="false" Mode="" Description="Set to 'true' to install the Experimental branch of the game." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
   <Config Name="Skip Steam Update" Target="SKIPUPDATE" Default="false" Mode="" Description="Avoid updating the game files on container start." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="SteamCMD Validate" Target="STEAMCMD_VALIDATE" Default="false" Mode="" Description="Set to 'true' to force SteamCMD to check hashes for all game files on boot. Keep 'false' for regular restarts to reduce boot time from minutes to seconds." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="Container Timezone" Target="TZ" Default="UTC" Mode="" Description="Set the container timezone (e.g. America/New_York or Australia/Sydney) so server logs and backups match your local time." Type="Variable" Display="always" Required="false" Mask="false">UTC</Config>
   <Config Name="VM Override" Target="VMOVERRIDE" Default="false" Mode="" Description="Set to true to skip the hypervisor processor check (only if CPU is recognized as generic QEMU/KVM)." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
 </Container>

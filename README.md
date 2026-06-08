@@ -193,6 +193,8 @@ helm install satisfactory k8s-at-home/satisfactory -f values.yaml
 | `TS_HOSTNAME`           | `satisfactory-server` | hostname for the server on your Tailnet             |
 | `GC_TIME_BETWEEN_PURGING`|   `30`    | Unreal Engine Garbage Collection frequency (seconds) to reduce hitching |
 | `GC_NUM_OBJECTS_PER_STEP`|  `2000`   | Max objects to purge per Garbage Collection step           |
+| `STEAMCMD_VALIDATE`     |  `false`  | set to true to force full verification of all game files   |
+| `TZ`                    |   `UTC`   | set container timezone for aligned logs and backup times   |
 
 ## Experimental Branch
 
