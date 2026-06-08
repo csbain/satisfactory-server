@@ -27,7 +27,6 @@ ENV AUTOSAVENUM="5" \
     TIMEOUT="30" \
     VMOVERRIDE="false" \
     SFTP_USERNAME="steam" \
-    SFTP_PASSWORD="satisfactory-sftp-pass" \
     TS_AUTHKEY="" \
     TS_HOSTNAME="satisfactory-server" \
     GC_TIME_BETWEEN_PURGING="30" \
