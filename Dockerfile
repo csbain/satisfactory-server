@@ -41,8 +41,8 @@ RUN set -x \
  && apt-get install -y gosu xdg-user-dirs curl jq tzdata openssh-server supervisor --no-install-recommends \
  && curl -fsSL https://tailscale.com/install.sh | sh \
  && rm -rf /var/lib/apt/lists/* \
- && groupadd -g ${GID} steam \
- && useradd -u ${UID} -g ${GID} -ms /bin/bash steam \
+ && if ! getent group steam >/dev/null; then groupadd -g ${GID} steam; else groupmod -g ${GID} steam; fi \
+ && if ! getent passwd steam >/dev/null; then useradd -u ${UID} -g steam -ms /bin/bash steam; else usermod -u ${UID} -g ${GID} steam; fi \
  && mkdir -p /home/steam/.local/share/Steam/ \
  && cp -R /root/.local/share/Steam/steamcmd/ /home/steam/.local/share/Steam/steamcmd/ \
  && chown -R ${UID}:${GID} /home/steam/.local/ \
