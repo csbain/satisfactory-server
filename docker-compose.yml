@@ -14,9 +14,13 @@ services:
       - '8888:8888/tcp'
       - '2222:2222/tcp'
     volumes:
-      # For Unraid: Bypasses FUSE overhead by mapping directly to cache disk (highly recommended)
-      # e.g., - '/mnt/cache/appdata/satisfactory-server:/config'
+      # You can map the base configuration directory (simplest setup):
       - './satisfactory-server:/config'
+      # Alternatively, map subdirectories individually (useful for splitting large game files from fast-access saves):
+      # - './satisfactory-server/gamefiles:/config/gamefiles'
+      # - './satisfactory-server/saved:/config/saved'
+      # - './satisfactory-server/backups:/config/backups'
+      # - './satisfactory-server/ficsit-cli:/config/ficsit-cli'
     environment:
       - MAXPLAYERS=4
       - PGID=1000
