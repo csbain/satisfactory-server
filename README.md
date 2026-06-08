@@ -111,7 +111,7 @@ services:
 ### unRAID Template
 
 If you are running this container on **unRAID**, an XML template is included in this repository under:
-[unraid-templates/satisfactory-server.xml](file:///c:/Users/chris/projects/satisfactory-server/unraid-templates/satisfactory-server.xml)
+[unraid-templates/satisfactory-server.xml](unraid-templates/satisfactory-server.xml)
 
 You can copy this XML file onto your unRAID flash drive at `/boot/config/plugins/dockerMan/templates-user/` to import the template directly into your Unraid Docker Manager interface, or add it to Community Applications.
 
