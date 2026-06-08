@@ -48,7 +48,8 @@ docker run \
 --env PGID=1000 \
 --env PUID=1000 \
 --env STEAMBETA=false \
---env SFTP_PASSWORD=satisfactory-sftp-pass \
+--env SFTP_USERNAME=satisfactory \
+--env SFTP_PASSWORD=satisfactory \
 --memory-reservation=8G \
 --memory 16G \
 --publish 7777:7777/tcp \
@@ -98,7 +99,8 @@ services:
       - PGID=1000
       - PUID=1000
       - STEAMBETA=false
-      - SFTP_PASSWORD=satisfactory-sftp-pass
+      - SFTP_USERNAME=satisfactory
+      - SFTP_PASSWORD=satisfactory
     restart: unless-stopped
     deploy:
       resources:
@@ -187,8 +189,8 @@ helm install satisfactory k8s-at-home/satisfactory -f values.yaml
 | `STEAMBETAKEY`          |           | set password for the beta game version (for testing)      |
 | `TIMEOUT`               |   `30`    | set client timeout (in seconds)                           |
 | `VMOVERRIDE`            |  `false`  | skips the CPU model check (should not ordinarily be used) |
-| `SFTP_USERNAME`         |   `steam` | username for SFTP server access (used for mod managers) |
-| `SFTP_PASSWORD`         | `satisfactory-sftp-pass` | password for SFTP server access (used for mod managers) |
+| `SFTP_USERNAME`         | `satisfactory` | username for SFTP server access (used for mod managers) |
+| `SFTP_PASSWORD`         | `satisfactory` | password for SFTP server access (used for mod managers) |
 | `TS_AUTHKEY`            |           | auth key to enable embedded Tailscale connection          |
 | `TS_HOSTNAME`           | `satisfactory-server` | hostname for the server on your Tailnet             |
 | `GC_TIME_BETWEEN_PURGING`|   `30`    | Unreal Engine Garbage Collection frequency (seconds) to reduce hitching |
@@ -212,7 +214,7 @@ You can use the desktop **Satisfactory Mod Manager (SMM)** from your client PC t
 3. Enter your server's credentials:
    - **Host/IP:** Your server's IP address.
    - **Port:** `2222` (default embedded SFTP port).
-   - **Username:** The username set in your `SFTP_USERNAME` environment variable (defaults to `steam`).
+   - **Username:** The username set in your `SFTP_USERNAME` environment variable (defaults to `satisfactory`).
    - **Password:** The password set in your `SFTP_PASSWORD` environment variable.
 4. Set the path to `/config/gamefiles` (the Satisfactory installation directory).
 5. SMM will automatically connect, install SML (Satisfactory Mod Loader), and allow you to toggle mods on/off directly from your PC.

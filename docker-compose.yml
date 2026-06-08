@@ -26,8 +26,8 @@ services:
       - PGID=1000
       - PUID=1000
       - STEAMBETA=false
-      - SFTP_USERNAME=steam
-      - SFTP_PASSWORD=satisfactory-sftp-pass
+      - SFTP_USERNAME=satisfactory
+      - SFTP_PASSWORD=satisfactory
       - TS_AUTHKEY=tskey-auth-YOUR-KEY
       - TS_HOSTNAME=satisfactory-server
       - GC_TIME_BETWEEN_PURGING=30

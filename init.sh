@@ -13,7 +13,7 @@ export CURRENTGID=$(id -g)
 export CURRENTUID=$(id -u)
 
 # Rename the 'steam' user if a custom SFTP_USERNAME is requested and we are root
-export SFTP_USERNAME="${SFTP_USERNAME:-steam}"
+export SFTP_USERNAME="${SFTP_USERNAME:-satisfactory}"
 if [[ "$CURRENTUID" -eq "0" ]] && [[ "$SFTP_USERNAME" != "steam" ]]; then
     printf "Renaming 'steam' user to '%s' to support custom SFTP_USERNAME...\\n" "$SFTP_USERNAME"
     usermod -l "$SFTP_USERNAME" steam
@@ -159,7 +159,7 @@ if [[ "$CURRENTUID" -eq "0" ]]; then
     
     # Update SFTP Password for custom sftp user
     if [ -z "$SFTP_PASSWORD" ]; then
-        SFTP_PASSWORD="satisfactory-sftp-pass"
+        SFTP_PASSWORD="satisfactory"
         printf "${MSGWARNING} SFTP_PASSWORD is not set. Defaulting to '%s'\\n" "$SFTP_PASSWORD"
     fi
     echo "$SFTP_USERNAME:$SFTP_PASSWORD" | chpasswd

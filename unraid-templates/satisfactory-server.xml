@@ -33,8 +33,8 @@
   <Config Name="TUN Device Path" Target="/dev/net/tun" Default="/dev/net/tun" Mode="" Description="TUN device endpoint (Required for Tailscale VPN connection)" Type="Device" Display="always" Required="false" Mask="false">/dev/net/tun</Config>
 
   <!-- Environment Variables -->
-  <Config Name="SFTP Username" Target="SFTP_USERNAME" Default="steam" Mode="" Description="Username for SFTP login. Used by SMM to connect and upload mods." Type="Variable" Display="always" Required="true" Mask="false">steam</Config>
-  <Config Name="SFTP Password" Target="SFTP_PASSWORD" Default="satisfactory-sftp-pass" Mode="" Description="Password for SFTP login. Used by SMM to connect and upload mods." Type="Variable" Display="always" Required="true" Mask="true">satisfactory-sftp-pass</Config>
+  <Config Name="SFTP Username" Target="SFTP_USERNAME" Default="satisfactory" Mode="" Description="Username for SFTP login. Used by SMM to connect and upload mods." Type="Variable" Display="always" Required="true" Mask="false">satisfactory</Config>
+  <Config Name="SFTP Password" Target="SFTP_PASSWORD" Default="satisfactory" Mode="" Description="Password for SFTP login. Used by SMM to connect and upload mods." Type="Variable" Display="always" Required="true" Mask="true">satisfactory</Config>
   <Config Name="Tailscale Auth Key" Target="TS_AUTHKEY" Default="" Mode="" Description="Your Tailscale auth/OAuth key. If provided, the container automatically registers with your Tailnet." Type="Variable" Display="always" Required="false" Mask="true"></Config>
   <Config Name="Tailscale Hostname" Target="TS_HOSTNAME" Default="satisfactory-server" Mode="" Description="The hostname this server will use on your Tailnet." Type="Variable" Display="always" Required="false" Mask="false">satisfactory-server</Config>
   <Config Name="Max Players" Target="MAXPLAYERS" Default="4" Mode="" Description="Max players allowed on the server." Type="Variable" Display="always" Required="false" Mask="false">4</Config>
